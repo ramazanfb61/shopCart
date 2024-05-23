@@ -1,5 +1,6 @@
-'use client'
-import { Formik, Field, Form, FormikHelpers } from "formik";
+"use client";
+import { Formik, Field, Form, FormikHelpers, ErrorMessage } from "formik";
+import * as Yup from "yup";
 
 interface Values {
   firstName: string;
@@ -17,6 +18,18 @@ export default function FormLogin() {
           lastName: "",
           email: "",
         }}
+        validationSchema={Yup.object({
+          firstName: Yup.string()
+            .max(15, "Must be 15 characters or less")
+            .min(3,'Must be 3 characters or more')
+            .required("Required"),
+          lastName: Yup.string()
+            .max(20, "Must be 20 characters or less")
+            .required("Required"),
+          email: Yup.string()
+            .email("Invalid Email adress")
+            .required("Required"),
+        })}
         onSubmit={(
           values: Values,
           { setSubmitting }: FormikHelpers<Values>
@@ -30,9 +43,10 @@ export default function FormLogin() {
         <Form className="border flex flex-col gap-y-3">
           <label htmlFor="firstName">First Name</label>
           <Field id="firstName" name="firstName" placeholder="John" />
-
+          <ErrorMessage className="" name="firstName" />
           <label htmlFor="lastName">Last Name</label>
           <Field id="lastName" name="lastName" placeholder="Doe" />
+          <ErrorMessage name="lastName" />
 
           <label htmlFor="email">Email</label>
           <Field
@@ -41,8 +55,11 @@ export default function FormLogin() {
             placeholder="john@acme.com"
             type="email"
           />
+          <ErrorMessage name="email" />
 
-          <button className='self-start' type="submit">Submit</button>
+          <button className="self-start" type="submit">
+            Submit
+          </button>
         </Form>
       </Formik>
     </div>
