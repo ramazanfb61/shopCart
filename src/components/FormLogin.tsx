@@ -1,67 +1,85 @@
 "use client";
-import { Formik, Field, Form, FormikHelpers, ErrorMessage } from "formik";
 import * as Yup from "yup";
+import { withFormik, FormikProps, FormikErrors, Form, Field } from "formik";
 
-interface Values {
-  firstName: string;
-  lastName: string;
+// Shape of form values
+interface FormValues {
   email: string;
+  password: string;
 }
 
-export default function FormLogin() {
+interface OtherProps {
+  message: string;
+}
+
+// Aside: You may see InjectedFormikProps<OtherProps, FormValues> instead of what comes below in older code.. InjectedFormikProps was artifact of when Formik only exported a HoC. It is also less flexible as it MUST wrap all props (it passes them through).
+const InnerForm = (props: OtherProps & FormikProps<FormValues>) => {
+  const { touched, errors, isSubmitting, message } = props;
   return (
-    <div>
-      <h1>Signup</h1>
-      <Formik
-        initialValues={{
-          firstName: "",
-          lastName: "",
-          email: "",
-        }}
-        validationSchema={Yup.object({
-          firstName: Yup.string()
-            .max(15, "Must be 15 characters or less")
-            .min(3,'Must be 3 characters or more')
-            .required("Required"),
-          lastName: Yup.string()
-            .max(20, "Must be 20 characters or less")
-            .required("Required"),
-          email: Yup.string()
-            .email("Invalid Email adress")
-            .required("Required"),
-        })}
-        onSubmit={(
-          values: Values,
-          { setSubmitting }: FormikHelpers<Values>
-        ) => {
-          setTimeout(() => {
-            alert(JSON.stringify(values, null, 2));
-            setSubmitting(false);
-          }, 500);
-        }}
+    <Form className="flex flex-col gap-y-2 mx-auto w-48">
+      <Field type="email" name="email" placeholder="email" className="border" />
+      {touched.email && errors.email && (
+        <div className="text-red-600 font-medium text-sm">{errors.email}</div>
+      )}
+
+      <Field
+        type="password"
+        name="password"
+        placeholder="******"
+        className="border"
+      />
+      {touched.password && errors.password && (
+        <div className="text-red-600 font-medium text-sm">
+          {errors.password}
+        </div>
+      )}
+
+      <button
+        className="border border-green-500 text-green-500 hover:bg-green-700 hover:text-green-200 transition font-medium w-24 self-center"
+        type="submit"
+        disabled={isSubmitting}
       >
-        <Form className="border flex flex-col gap-y-3">
-          <label htmlFor="firstName">First Name</label>
-          <Field id="firstName" name="firstName" placeholder="John" />
-          <ErrorMessage className="" name="firstName" />
-          <label htmlFor="lastName">Last Name</label>
-          <Field id="lastName" name="lastName" placeholder="Doe" />
-          <ErrorMessage name="lastName" />
-
-          <label htmlFor="email">Email</label>
-          <Field
-            id="email"
-            name="email"
-            placeholder="john@acme.com"
-            type="email"
-          />
-          <ErrorMessage name="email" />
-
-          <button className="self-start" type="submit">
-            Submit
-          </button>
-        </Form>
-      </Formik>
-    </div>
+        Submit
+      </button>
+    </Form>
   );
+};
+
+// The type of props MyForm receives
+interface MyFormProps {
+  initialEmail?: string;
+  message: string; // if this passed all the way through you might do this or make a union type
 }
+
+// Wrap our form with the withFormik HoC
+const MyForm = withFormik<MyFormProps, FormValues>({
+  // Transform outer props into form values
+  mapPropsToValues: (props) => {
+    return {
+      email: props.initialEmail || "",
+      password: "",
+    };
+  },
+
+  // Add a custom validation function (this can be async too!)
+  validationSchema: Yup.object({
+    email: Yup.string().email("not valid").required("Email required"),
+    password: Yup.string()
+      .min(10, "password has to be longer then 10 characters")
+      .required("Password required"),
+  }),
+
+  handleSubmit: (values) => {
+    // do submitting things
+    alert(values.email + "  \n" + values.password);
+  },
+})(InnerForm);
+
+// Use <MyForm /> wherevs
+const FormLogin = () => (
+  <div className="mt-10">
+    <MyForm message="Sign up" />
+  </div>
+);
+
+export default FormLogin;
