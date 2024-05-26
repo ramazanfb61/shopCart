@@ -69,9 +69,17 @@ const MyForm = withFormik<MyFormProps, FormValues>({
       .required("Password required"),
   }),
 
-  handleSubmit: (values) => {
+  handleSubmit: async (values) => {
     // do submitting things
-    alert(values.email + "  \n" + values.password);
+    try {
+      await fetch("/api/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(values),
+      });
+    } catch (error) {
+      console.log(error);
+    }
   },
 })(InnerForm);
 

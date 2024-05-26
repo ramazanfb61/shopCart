@@ -2,10 +2,7 @@ import { PrismaClient } from "@prisma/client/extension";
 
 export const prisma = new PrismaClient();
 
-async function main() {
-  const allUsers = await prisma.user.findMany()
-  console.log(allUsers)
-}
+async function main() {}
 
 main()
   .catch(async (e) => {
