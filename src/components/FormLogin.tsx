@@ -71,21 +71,26 @@ const MyForm = withFormik<MyFormProps, FormValues>({
 
   handleSubmit: async (values) => {
     // do submitting things
-    try {
-      await fetch("/api/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(values),
-      });
-    } catch (error) {
-      console.log(error);
-    }
   },
 })(InnerForm);
 
+async function getData() {
+  const res = await fetch("/api/register", {
+    method: "GET",
+    headers: { "Content-Type": "application/json" }
+  });
+  if (!res.ok) {
+    throw new Error("Error");
+  }
+  console.log(res.json());
+  
+  
+}
+const data = getData();
 // Use <MyForm /> wherevs
 const FormLogin = () => (
   <div className="mt-10">
+    <button onClick={getData}>Get Data</button>
     <MyForm message="Sign up" />
   </div>
 );
